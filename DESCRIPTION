@@ -1,11 +1,21 @@
 Package: flowMie
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Modeling a Detector Response to Scattering of (Multi-layer) Spherical Particles
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Wade Rogers
+Maintainer: Wade Rogers <wade.rogers@spcytomics.com>
+Description: flowMie models the response of a scattering detector in a flow
+    cytometer to the presence of a single, spherical particle with one or more layers
+    described by a refractive index and a radius.
+    Extracellular Vesicles (EVs) are typically described by a lumen surrounded
+    by a membrane, each of which can have different refractive indices (generally the
+    membrane has a higher RI than the lumen).
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Depends:
+  R (>= 3.4.0)
+Imports:
+  Rscattnlay,
+  methods
+RoxygenNote: 7.0.2
