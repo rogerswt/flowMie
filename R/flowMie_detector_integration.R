@@ -18,7 +18,7 @@
 # theta_0 = 90 # SSC detector
 
 #' @import Rscattnlay
-#' @importFrom methods as
+#' @importFrom methods as is
 #' @importFrom stats approx
 
 #' @title Create a Model of a Flow Cytometer Scatter Detector
@@ -126,25 +126,38 @@ create_EV <- function(medium = 1.34, lambda = 488, n_core = 1.38, n_membrane = 1
   P
 }
 
-# Given: A RScattnlay Scatterer specification 'S'
-#        describes the medium's and the particle's refractive indices
-#        and particle geometry (e.g. core + shell, just core, etc)
-#        and incident radiation wavelength
-# Given: detector half-angle of acceptance 'beta' (degrees)
-# Given: Laser polarization angle psi_0 (degrees)
-#          0   = in the plane of incidence
-#         pi/2 = perpendicular to the plane of incidence
-#         degree of polarization 'pol' (0 <= pol <= 1)
-# Given: a coefficient 'gain' which expresses the relative conversion
-#        of photons to SSC signal amplitude
-#
-# Do the numeric integration of detected scattering signal over the
-# detector surface
-#    dr   = delta_r (scaled such that detector radius = 1 unit)
-#    dphi = delta_phi (azimuthal angle on detector face, in degrees)
-calculate_ssc_particle = function(S, detector = create_detector(),
-                                  gain = 1, dr = .01, dphi = 1) {
+#' @title Calculate Detector Response
+#' @param S A \code{ \link[Rscattnlay]{Scatterer}} particle description. This object
+#' encapsulates the medium's and the particle's refractive indices, the particle's
+#' geometry (e.g. core + shell, just core, etc), and the incident radiation wavelength.
+#' @param detector A detector object, created using \link{create_detector}.  This
+#' object describes the geometry of the detector as well as the polarization state
+#' of the incident light.
+#' @param gain A coefficient that expresses the relative conversion of photons
+#' to scattering signal amplitude.  Default = 1.0.
+#' @param dr The numerical integration delta_radius across the detector, whose
+#' diameter is, by definition, 1.0.  Integration limits are 0,1.  Default = 0.02,
+#' accurate to about 2 percent.
+#' @param dphi The numerical integration of azimuthal angle delta_phi across the detector.
+#' Integration limits are 0,360.  Default = 10.0, accurate to about .06 percent.
+#' @description This function performs the numerical integration of detected
+#' scattering signal over the detector surface.  A significant constraint is that
+#' the detector is assumed to be cylindrically symmetrical.
+#'
+#' We retrieve the scattering amplitudes from Rscattnlay, and calculate the
+#' Stokes matrix elements S11 and S12, which are required to accurately handle
+#' polarization effects.
+#' @export
+calculate_detector_response = function(S, detector = create_detector(),
+                                  gain = 1, dr = .02, dphi = 10.0) {
 
+  if (is(detector) != "detector") {
+    stop("Please create a valid detector using create_detector()")
+  }
+
+  if (is(S) != "Scatterer") {
+    stop("Please create a valid particle description using create_particle()")
+  }
   beta = detector$beta
   psi_0 = detector$psi_0
   pol = detector$pol
