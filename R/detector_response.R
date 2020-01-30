@@ -12,9 +12,10 @@
 #
 
 #' @title Calculate Detector Response
-#' @param S A \code{ \link[Rscattnlay]{Scatterer}} particle description. This object
+#' @param particle A \code{ \link[Rscattnlay]{Scatterer}} particle description. This object
 #' encapsulates the medium's and the particle's refractive indices, the particle's
 #' geometry (e.g. core + shell, just core, etc), and the incident radiation wavelength.
+#' Default = an EV with diameter 180 nm.
 #' @param detector A detector object, created using \link{create_detector}.  This
 #' object describes the geometry of the detector as well as the polarization state
 #' of the incident light.
