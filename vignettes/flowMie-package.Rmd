@@ -1,0 +1,87 @@
+---
+title: "Mie Theory Modeling of Cytometer Response to Extracellular Vesicles"
+author: "Wade Rogers"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+# pre-load libraries
+library(flowCore)
+library(Rscattnlay)
+library(flowMie)
+```
+
+## Introduction
+There has been a great deal of interest in recent years in Extracellular Vesicles (EVs), including exosomes and microvesicles.  There are a number of methods of detecting and characterizing EVs.  Flow cytometry is capable of multi-parameter EV detection and characterization, but not all instruments are capable of this difficult feat.
+
+`flowMie` provides tools to describe small particles, including calibration beads as well as EVs, along with an optical description of the flow cytometer laser and detector systems, that enable a complete and accurate modeling environment to calculate and characterize the response of your flow cytometer to these very small and dim particles.
+
+## Describe the Flow Cytometer
+The first step is to describe the characteristics of the flow cytometer that affect its response to the scattering of light.  These characteristics include:
+
+- The nominal scattering angle of the detector
+- The scattering detector half-angle of acceptance with respect to the objective's focal plane
+- The laser polarization
+
+Please note that as of now the detector aperture is assumed to be round (more precisely, cylindrically symmetrical).  Oddly, the laser wavelength isn't modeled in the detector but rather in the particle (due to the organization of objects in Rscattnlay).
+
+```{r detector, eval=TRUE, echo=TRUE}
+
+# create a detector, 
+#    - located at 90 degrees with respect to the incident laser light,
+#    - with a detector half-angle of 60 degrees,
+#    - laser is linearly polarized perpendicular to the plane of incidence
+detector = create_detector(theta_0 = 90, beta = 60, psi_0 = 90, pol = 1.0)
+```
+
+## Describe Particles
+The function `create_particle()` flexibly describes a particle characterized by:
+
+- How many layers it has
+- The radius of each layer
+- the refractive index of each layer
+
+as well as:
+
+- the refractive index of the medium in which it's suspended
+- the wavelength of the incident light
+
+```{r scatterer, eval=TRUE, echo=TRUE}
+# create a 2-layer particle
+#    - the first layer has a radius of 95 nm and RI of 1.38 (the core)
+#    - the second layer has a radius of 100 nm and RI of 1.46 (the membrane)
+# The particle is in a fluid whose RI is 1.34, corresponding to normal saline
+# The incident wavelenth is 488 (the blue laser, off which the SSC detector is located)
+vesicle = create_particle(medium = 1.34, lambda = 488, n_layers = 2, r = c(95, 100), n = c(1.38, 1.46))
+```
+
+In addition to this general-purpose function there are a few convenience functions with built-in refractive indices, and which accept the size description as a diameter rather than a radius (in keeping with the way calibration beads are typically described).  These functions are simply wrappers for `create_particle()`:
+
+```{r beads, eval=TRUE, echo=TRUE}
+# a 100 nm diameter polystyrene bead in saline, illuminated by the blue laser
+bead_polystyrene = create_PS(d = 100)
+
+# a 200 nm diameter silica bead in saline, illuminated by the blue laser
+bead_silica = create_SI(d = 200)
+
+# an EV in saline, illuminated by the blue laser
+ev = create_EV(d = 200)
+
+```
+
+## Calculate Scattering Response
+
+
+## The Mie Transform
+
+
+
