@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 library(flowCore)
 library(Rscattnlay)
 library(flowMie)
+library(wadeTools)
 ```
 
 ## Introduction
@@ -79,7 +80,89 @@ ev = create_EV(d = 200)
 ```
 
 ## Calculate Scattering Response
+Now that we've described the instrument and the particle we can perform scattering calculations.
+```{r calc, eval=TRUE, echo=TRUE}
+# how big is the scattering signal with our default detector due to a 200 nm diameter silica bead?
+val = calculate_detector_response(particle = create_SI(d = 200), detector = create_detector())
+val
+```
 
+Let's look at the size-dependence of several types of particles, with a realistic instrument, and an instrument with a very narrow acceptance half-angle:
+```{r size_dep, eval=TRUE, echo=TRUE, out.width="100%", fig.height=14, fig.width=14}
+
+# make an "instrument" with narrow acceptance angle for SSC
+instr_narrow = create_detector(beta = 1)
+
+# make an instrument that corresponds to a BD Canto
+instr_canto = create_detector()
+
+dia = seq(20, 1000, by = 5)
+ssc_au   = ssc_ps   = ssc_si   = ssc_ev   = vector('numeric')
+ssc_au_n = ssc_ps_n = ssc_si_n = ssc_ev_n = vector('numeric')
+for (i in 1:length(dia)) {
+  # gold nanoparticles.  Note the complex refractive index, characteristic of metals
+  gold = create_particle(n_layers = 1, r = dia[i] / 2, n = 1.1271+1.8382i)
+  ssc_au[i]   = calculate_detector_response(gold, detector = instr_canto)
+  ssc_au_n[i] = calculate_detector_response(gold, detector = instr_narrow)
+  
+  # polystyrene
+  ps = create_PS(d = dia[i])
+  ssc_ps[i]   = calculate_detector_response(ps, detector = instr_canto)
+  ssc_ps_n[i] = calculate_detector_response(ps, detector = instr_narrow)
+  
+  # silica
+  si = create_SI(d = dia[i])
+  ssc_si[i]   = calculate_detector_response(si, detector = instr_canto)
+  ssc_si_n[i] = calculate_detector_response(si, detector = instr_narrow)
+ 
+  # EV
+  ev = create_EV(d = dia[i])
+  ssc_ev[i]   = calculate_detector_response(ev, detector = instr_canto)
+  ssc_ev_n[i] = calculate_detector_response(ev, detector = instr_narrow) 
+}
+
+# plot the results
+par(mar = c(5, 5, 4, 1))
+decades = c(1e-8, 1e1)
+cex = 1.5
+lwd = 2
+plot(dia, ssc_au, type = 'l', log = 'y', ylim = decades, xlim = c(0, 1000),
+     xlab = "Particle Diameter (nm)", ylab = "Scattering Intensity (Arb. Units)",
+     yaxt = 'n', cex.axis = cex, cex.lab = cex, lwd = lwd)
+axis(side = 2, at = 10^(-8:1), labels = tick.labels(-8, 1), cex.axis = cex)
+lines(dia, ssc_au_n, col = 'black', lty = 'dotdash', lwd = lwd)
+
+lines(dia, ssc_ps, col = 'indianred2', lwd = lwd)
+lines(dia, ssc_ps_n, col = 'indianred2', lty = 'dotdash', lwd = lwd)
+
+lines(dia, ssc_si, col = 'dodgerblue2', lwd = lwd)
+lines(dia, ssc_si_n, col = 'dodgerblue2', lty = 'dotdash', lwd = lwd)
+
+lines(dia, ssc_ev, col = 'springgreen4', lwd = lwd)
+lines(dia, ssc_ev_n, col = 'springgreen4', lty = 'dotdash', lwd = lwd)
+
+idx = which(dia == 200)
+text(x = 200, y = ssc_au[idx], labels = "Au", col = 'black', cex = cex, pos = 3)
+text(x = 200, y = ssc_ps[idx], labels = "PS", col = 'indianred2', cex = cex, pos = 3)
+text(x = 200, y = ssc_si[idx], labels = "SI", col = 'dodgerblue2', cex = cex, pos = 3)
+text(x = 200, y = ssc_ev[idx], labels = "EV", col = 'springgreen4', cex = cex, pos = 3)
+
+ssc_au[idx] / ssc_ps[idx]
+ssc_ps[idx] / ssc_si[idx]
+ssc_si[idx] / ssc_ev[idx]
+ssc_au[idx] / ssc_ev[idx]
+```
+
+There are a few things to note about this picture.  
+
+1. First and foremost the y-axis is logarithmic and covers 10 decades of dynamic range.
+1. Once the particle size drops below about 200-300 nm (or about half the wavelength of the incident light, which in this example is 488 nm), the curves become ridiculously steep.  This means that a small reduction in the particle size results in a large decrease in the signal it will generate.  This sets a pretty hard stop on the size limit of detectability in most cytometers.
+1. The material of which the particle is made has a **profound** effect on the amount of light it scatters.  Gold particles (black curves) >> polystyrene (red curves) >> silica (blue curves) >> EVs (green curves).  Comparing at 200 nm diameter, 
+    - gold scatters almost 10 times as much as polystyrene
+    - polystyrene scatters about 5 times as much as silica
+    - silica scatters almost 7 times as much as an EV
+    - gold scatters an astounding 300 times as much as an EV
+1. Comparing the solid versus the dot-dashed curves, we see the smoothing effect due to the large acceptance angle of real-life flow cytometers.  They're the way they are because high numerical aperture optics are generally designed in order to collect as much light as possible.  This means that the side scatter detector doesn't just measure 90 deg. scattering, but a range of +- 60 or so degrees around that 90 deg nominal angle.  The wiggles, or "Mie Resonances", are very pronounced with a narrow detector.
 
 ## The Mie Transform
 
