@@ -2,9 +2,12 @@
 
 export(calculate_detector_response)
 export(create_EV)
+export(create_PS)
+export(create_SI)
 export(create_detector)
 export(create_particle)
 import(Rscattnlay)
+import(flowCore)
 importFrom(methods,as)
 importFrom(methods,is)
 importFrom(stats,approx)

@@ -17,5 +17,6 @@ Depends:
   R (>= 3.4.0)
 Imports:
   Rscattnlay,
+  flowCore,
   methods
 RoxygenNote: 7.0.2
