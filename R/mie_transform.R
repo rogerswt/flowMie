@@ -106,6 +106,9 @@ mie_transform = function(ff,
   # handle negative values
   ssc[ssc < 0] = 0
 
+  # handle large values
+  ssc[ssc >= max(lut)] = max(lut)
+
   # pass it through the lut
   size = approx(lut, xout = ssc)$y
 
