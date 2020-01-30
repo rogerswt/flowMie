@@ -33,14 +33,14 @@
 #' Stokes matrix elements S11 and S12, which are required to accurately handle
 #' polarization effects.
 #' @export
-calculate_detector_response = function(S, detector = create_detector(),
+calculate_detector_response = function(particle = create_EV(d = 180), detector = create_detector(),
                                        gain = 1, dr = .02, dphi = 10.0) {
 
   if (is(detector) != "detector") {
     stop("Please create a valid detector using create_detector()")
   }
 
-  if (is(S) != "Scatterer") {
+  if (is(particle) != "Scatterer") {
     stop("Please create a valid particle description using create_particle()")
   }
   beta = detector$beta
@@ -49,7 +49,7 @@ calculate_detector_response = function(S, detector = create_detector(),
   theta_0 = detector$theta_0
 
   # get the Stokes matrix elements S11, S12
-  Q <- amplitudes(S)
+  Q <- amplitudes(particle)
   S1 = Q$S1
   S2 = Q$S2
   qthet = Q$Theta
