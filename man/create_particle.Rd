@@ -12,7 +12,7 @@ approximating the RI of normal saline solution)}
 
 \item{lambda}{The wavelength of the incident light, in nm.  Default = 488.}
 
-\item{n_angle}{The number of angular steps to calculate scattering, in degrees.  (Default = 361).
+\item{n_angle}{The number of angular steps to calculate Stokes coefficients, in degrees.  (Default = 361).
 Note: more steps increases resolution at the expense of run time.  The default is
 adequate for most situations.}
 

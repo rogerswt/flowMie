@@ -23,6 +23,6 @@ An object of class \code{ \link[Rscattnlay]{Scatterer}}.
 Create_SI creates a model of a silica bead.
 This is really just a convenience wrapper for \link{create_particle} with default
 refractive index corresponding to silica  The user only needs to
-specify the size of the bead.   **Please note
-that this function uses the diameter, NOT the radius of the particle!**
+specify the size of the bead.
+**Please note that this function uses the diameter, NOT the radius of the particle!**
 }

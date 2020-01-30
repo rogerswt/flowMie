@@ -15,7 +15,7 @@
 #' @param medium The refractive index (RI) of the material surrounding the particle (Default = 1.34,
 #' approximating the RI of normal saline solution)
 #' @param lambda The wavelength of the incident light, in nm.  Default = 488.
-#' @param n_angle The number of angular steps to calculate scattering, in degrees.  (Default = 361).
+#' @param n_angle The number of angular steps to calculate Stokes coefficients, in degrees.  (Default = 361).
 #' Note: more steps increases resolution at the expense of run time.  The default is
 #' adequate for most situations.
 #' @param n_layers The number of layers in a particle.  A typical model of an EV
@@ -72,8 +72,8 @@ create_particle = function(medium = 1.34, lambda = 488, n_angle = 361, n_layers,
 #' @description Create_EV creates a model of a 2-layer particle, suitable to describe an EV.
 #' This is really just a convenience wrapper for \link{create_particle}, allowing the description of
 #' a particle with total diameter `d`, surrounded by a membrane specified by its thickness.
-#' The refractive indices of the core and membrane can be specified separately. **Please note
-#' that this function uses the diameter, NOT the radius of the particle!**
+#' The refractive indices of the core and membrane can be specified separately.
+#' **Please note that this function uses the diameter, NOT the radius of the particle!**
 #' @return An object of class \code{ \link[Rscattnlay]{Scatterer}}.
 #' @export
 create_EV <- function(medium = 1.34, lambda = 488, n_core = 1.38, n_membrane = 1.46, thickness_membrane = 5.0, d) {
@@ -93,8 +93,8 @@ create_EV <- function(medium = 1.34, lambda = 488, n_core = 1.38, n_membrane = 1
 #' @description Create_PS creates a model of a polystyrene bead.
 #' This is really just a convenience wrapper for \link{create_particle} with default
 #' refractive index corresponding to polystyrene.  The user only needs to
-#' specify the size of the bead.   **Please note
-#' that this function uses the diameter, NOT the radius of the particle!**
+#' specify the size of the bead.
+#' **Please note that this function uses the diameter, NOT the radius of the particle!**
 #' @return An object of class \code{ \link[Rscattnlay]{Scatterer}}.
 #' @export
 create_PS = function(medium = 1.34, lambda = 488, n = 1.605, d) {
@@ -112,8 +112,8 @@ create_PS = function(medium = 1.34, lambda = 488, n = 1.605, d) {
 #' @description Create_SI creates a model of a silica bead.
 #' This is really just a convenience wrapper for \link{create_particle} with default
 #' refractive index corresponding to silica  The user only needs to
-#' specify the size of the bead.   **Please note
-#' that this function uses the diameter, NOT the radius of the particle!**
+#' specify the size of the bead.
+#' **Please note that this function uses the diameter, NOT the radius of the particle!**
 #' @return An object of class \code{ \link[Rscattnlay]{Scatterer}}.
 #' @export
 create_SI = function(medium = 1.34, lambda = 488, n = 1.463, d) {

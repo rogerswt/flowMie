@@ -34,6 +34,6 @@ An object of class \code{ \link[Rscattnlay]{Scatterer}}.
 Create_EV creates a model of a 2-layer particle, suitable to describe an EV.
 This is really just a convenience wrapper for \link{create_particle}, allowing the description of
 a particle with total diameter `d`, surrounded by a membrane specified by its thickness.
-The refractive indices of the core and membrane can be specified separately. **Please note
-that this function uses the diameter, NOT the radius of the particle!**
+The refractive indices of the core and membrane can be specified separately.
+**Please note that this function uses the diameter, NOT the radius of the particle!**
 }
