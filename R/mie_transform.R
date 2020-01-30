@@ -33,7 +33,7 @@ calibrate_ssc_conversion = function(detector = create_detector(),
                                     bead = create_SI(d = 200),
                                     bead_mfi = 60000,
                                     show = FALSE) {
-  ssc_raw = calculate_detector_response(S = bead, detector = detector)
+  ssc_raw = calculate_detector_response(particle = bead, detector = detector)
   gain = bead_mfi / ssc_raw
 
   ssc_ev = vector('numeric')
