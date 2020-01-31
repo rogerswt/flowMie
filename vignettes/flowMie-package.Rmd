@@ -226,9 +226,7 @@ The differences, while relatively small, are not negligible, and can lead to a s
 
 Polarization effects are a function of the detector numerical aperture.  For lower numerical aperture instruments, polarization effects can lead to differences of several-fold, as opposed to 10 - 30% for high numerical aperture machines.  Thus, care should be taken to accurately characterize the detector, in terms of both detector numerical aperture (or equivalently the half-angle of acceptance) as well as the polarization state of the illuminating laser light.
 
-We welcome instrument manufacturers to submit specifications for inclusion in this package.  Please send email to:
-
-[Wade Rogers](mailto:wade.rogers@spcytomics.com)
+We welcome instrument manufacturers to submit specifications for inclusion in this package.  Please send an email to: [Wade Rogers](mailto:wade.rogers@spcytomics.com)
 
 ## The Mie Transform
 We often look at EVs in a flow cytometry dataset by plotting a fluorescence parameter against, say, SSC-A.  However, we now have the means, via the *Mie Transform*, to directly invert the signal in the data to EV diameter.  The function `mie_transform` performs this inversion.  We will use this function to add a physical size parameter to a flowFrame so that size distributions can be directly studied.
