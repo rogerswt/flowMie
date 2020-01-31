@@ -1,7 +1,7 @@
 Package: flowMie
 Type: Package
 Title: Modeling a Detector Response to Scattering of (Multi-layer) Spherical Particles
-Version: 0.1.0
+Version: 0.2.0
 Author: Wade Rogers
 Maintainer: Wade Rogers <wade.rogers@spcytomics.com>
 Description: flowMie models the response of a scattering detector in a flow
