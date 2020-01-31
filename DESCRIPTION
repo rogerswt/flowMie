@@ -19,7 +19,10 @@ Imports:
   Rscattnlay,
   flowCore,
   methods
-Remotes: rogerswt/RScattnlay, bioc::release/flowCore
+Remotes: 
+  rogerswt/RScattnlay, 
+  rogerswt/wadeTools, 
+  bioc::release/flowCore
 RoxygenNote: 7.0.2
 Suggests: 
   knitr, 
