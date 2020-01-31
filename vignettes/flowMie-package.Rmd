@@ -189,15 +189,15 @@ library(wadeTools)   # for some convenient functions, like doTransform(), bx(), 
 library(fields)      # xline, yline
 library(KernSmooth)  # bkde
 
-# load bead data.  The beads assumed to be 200 nm Silica
+# load bead data.  The beads are assumed to be 200 nm Silica
 fn_bead = system.file("extdata", "beads.fcs", package = "flowMie")
 ff_bead = read.FCS(fn_bead)
 
-# load triton data to gate CD41a+ EVs from background
+# load triton data.  We'll use this to gate CD41a+ EVs from background
 fn_triton = system.file("extdata", "sampled_triton.fcs", package = "flowMie")
 ff_triton = read.FCS(fn_triton)
 
-# load the EV data and gate it
+# load the EV data.
 fn_ev = system.file("extdata", "sampled_ev.fcs", package = "flowMie")
 ff_ev = read.FCS(fn_ev)
 
@@ -210,7 +210,7 @@ ff_ev = doTransform(ff_ev, cols = 1:3, method = 'biexp')
 kde_bead = bkde(exprs(ff_bead)[, "SSC-A"], bandwidth = 0.05)
 bead_mfi = ibx(find.local.maxima(kde_bead)$x)
 
-# calibrate the gain factor
+# calibrate the gain factor.  We'll use this later for mie_transform().
 calibrate = calibrate_ssc_conversion(detector = create_detector(), 
                                bead = create_SI(d = 200), 
                                bead_mfi = bead_mfi)
@@ -220,7 +220,7 @@ calibrate = calibrate_ssc_conversion(detector = create_detector(),
 # were biexponentially transformed.
 ffs = mie_transform(ff = ff_ev, ssc_param = "SSC-A", transformation = 'biexp', lut = calibrate$lut)
 
-# gate the EV data based on the triton negative control and the calibration beads
+# gate the EV data based on the triton negative control (for fluorescence) and the calibration beads (for size)
 kde_triton = bkde(exprs(ff_triton)[, "780/60 Red-A"], bandwidth = 0.05)
 kde_triton$y = bx(1e5) * kde_triton$y / max(kde_triton$y)
 ckde = cumm.kde(kde_triton)
@@ -233,19 +233,24 @@ kde_size$y = bx(1e5) * kde_size$y / max(kde_size$y)
 
 # Visualize results
 par(mfrow = c(2, 2))
+
+# first plot: the beads
 pplot(ff_bead, c("780/60 Red-A", "SSC-A"), main = "Calibration Beads")
 lines(kde_bead$y, kde_bead$x)
 yline(bx(bead_mfi), col = 'red', lty = 'dotdash', lwd = 2)
 
+# second plot: the triton control and fluorescence threshold
 pplot(ff_triton, c("780/60 Red-A", "SSC-A"), main = "Triton Negative Control")
 lines(kde_triton)
 xline(thresh, col = 'red', lty = 'dotdash', lwd = 2)
 
+# third plot: the raw EV data
 pplot(ffs, c("780/60 Red-A", "SSC-A"), main = "EV Data")
 xline(thresh, col = 'red', lty = 'dotdash', lwd = 2)
 yline(bx(bead_mfi), col = 'red', lty = 'dotdash', lwd = 2)
 kde_size$y = bx(1e5) * kde_size$y / max(kde_size$y)
 
+# fourth plot: gated EV size distribution
 pplot(ffs_gated, c("780/60 Red-A", "Size (nm)"), ty = 'linear', main = "Gated EV Data by Size")
 lines(kde_size$y, kde_size$x)
 x.text = bx(1e3)
@@ -264,7 +269,7 @@ text(x = x.text, y = y.text - 60,
 ```
 
 ## Concluding Remarks
-I hope you will find this package useful in understanding your *flow vesiculometry* data.  
+I hope you  find this package useful in understanding your *flow vesiculometry* data.  
 
 This package is in alpha development.  I would encourage you to contact me if you have any comments, bug reports, or suggestions for improvements and extensions.
 
