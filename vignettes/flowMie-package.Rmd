@@ -178,8 +178,52 @@ There are a few things to note about this picture.
     - silica scatters about 4 times as much as an EV
     - gold scatters almost 1000 times as much as an EV
 1. This dependence on the particle material is why the choice of reference materials is so important.  Artificial particles whose size and refractive index are most similar to EVs make the most appropriate reference materials.
-1. Comparing the solid versus the dot-dashed curves, we see the smoothing effect due to the large acceptance angle of real-life flow cytometers.  They're the way they are because high numerical aperture optics are generally part of teh cytometer design in order to collect as much light as possible.  This means that the side scatter detector doesn't just measure 90 deg. scattering, but a range of +- 60 or so degrees around that 90 deg nominal angle.  The wiggles, or "Mie Resonances", are very pronounced with a narrow detector, and not so much with a realistically described flow cytometer.
+1. Comparing the solid versus the dot-dashed curves, we see the smoothing effect due to the large acceptance angle of real-life flow cytometers.  They're the way they are because high numerical aperture optics are generally part of the cytometer design in order to collect as much light as possible.  This means that the side scatter detector doesn't just measure 90 deg. scattering, but a range of +- 60 or so degrees around that 90 deg nominal angle.  The wiggles, or "Mie Resonances", are very pronounced with a narrow detector, and not so much with a realistically described flow cytometer.
 1. For instruments with large numerical aperture, the Mie scattering signal is pretty much monotonic up to about 500-600 nm.  This is important for computing the Mie Transform (see the next section).  If the scattering signal is NOT monotonic, then a given scattering signal could correspond to two (or more) vastly different particle sizes (draw a horizontal line through the Mie Resonances in the above figure to see what I mean).  Fortunately, for particle sizes of interest (<500 nm typically) and large numerical aperture, this isn't the case.
+
+## Polarization Effects
+All other treatments of Mie Theory for flow cytometry of which we are aware have not taken into account the polarization state of the incident light.  This is a small but significant effect.  Given that most flow cytometers use lasers as the light source, and since lasers  nearly always produce linearly polarized light, it seems to us that this should be taken into account.
+
+```{r polarization, eval=TRUE, echo=TRUE, out.width="100%", fig.height=14, fig.width=14}
+det_unpol = create_detector(theta_0 = 90, beta = 60, psi_0 = 90, pol = 0)
+det_pol   = create_detector(theta_0 = 90, beta = 60, psi_0 = 90, pol = 1.0)
+det_pol_in   = create_detector(theta_0 = 90, beta = 60, psi_0 = 0, pol = 1.0)
+
+dia = seq(20, 1000, by = 5)
+ssc_si    = vector('numeric')
+ssc_si_un = vector('numeric')
+ssc_si_in = vector('numeric')
+for (i in 1:length(dia)) {
+  si = create_SI(d = dia[i])
+  ssc_si[i]   = calculate_detector_response(si, detector = det_pol)
+  ssc_si_un[i] = calculate_detector_response(si, detector = det_unpol)
+  ssc_si_in[i] = calculate_detector_response(si, detector = det_pol_in)
+}
+
+# plot the results
+par(mar = c(5, 5, 4, 1))
+decades = c(1e-3, 1e-1)
+cex = 1.5
+lwd = 2
+plot(dia, ssc_si, type = 'l', lty = 'dotdash', log = 'y', ylim = decades, xlim = c(100, 300),
+     xlab = "Particle Diameter (nm)", ylab = "Scattering Intensity (Arb. Units)",
+     yaxt = 'n', cex.axis = cex, cex.lab = cex, lwd = lwd)
+axis(side = 2, at = 10^(-8:1), labels = tick.labels(-8, 1), cex.axis = cex)
+lines(dia, ssc_si_un, col = 'black', lwd = lwd)
+lines(dia, ssc_si_in, col = 'black', lty = 'dotted', lwd = lwd)
+x.text = 200
+y.text = 5e-3
+text(x = x.text, y = y.text, labels = "Solid: Unpolarized", cex = 2, pos = 4)
+text(x = x.text, y = y.text / 1.5, labels = "DotDash: Perpendicular Polarized", cex = 2, pos = 4)
+text(x = x.text, y = y.text / 1.5^2, labels = "Dotted: Parallel Polarized", cex = 2, pos = 4)
+
+mean(ssc_si / ssc_si_in)
+max(ssc_si / ssc_si_in)
+min(ssc_si / ssc_si_in)
+
+```
+The differences, while relatively small, are not negligible.  Differences between polarization in-plane versus perpendicular to the plane range from about 12% to 32%, with an average about 20%.  Polarized light perpendicular to the plane of incidence yields higher scattering, whereas polarization in the plane of incidence produces lower scattering.  Unpolarized light is somewhere in between.
+
 
 ## The Mie Transform
 We often look at EVs in a flow cytometry dataset by plotting a fluorescence parameter against, say, SSC-A.  However, we now have the means, via the *Mie Transform*, to directly invert the signal in the data to EV diameter.  The function `mie_transform` performs this inversion.  We will use this function to add a physical size parameter to a flowFrame so that size distributions can be directly studied.
