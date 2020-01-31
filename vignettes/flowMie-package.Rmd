@@ -320,7 +320,7 @@ text(x = x.text, y = y.text - 60,
 - The upper left panel shows the analysis of the calibration beads.  
 - The upper right panel deduces a fluorescence threshold based on a tritonized sample, in which EVs are wiped out but sources of background remain.  
 - The lower left panel shows the EV sample, analyzed under identical conditions as both the bead and triton runs.  The red lines indicate cut-offs used to gate the EV region.  
-- Finally, the lower right panel shows the gated EVs, with the Y-axis indicating particle size in nm as computed with the Mie Transform. We note that the sharp rise of the distribution at about 100 nm is certainly due to the sensitivity cut-off of the instrument, and not to the actual underlying EV size distribution.
+- Finally, the lower right panel shows the gated EVs, with the Y-axis indicating particle size in nm as computed with the Mie Transform. We note that the sharp rise of the distribution at about 100 nm is certainly due to the sensitivity cut-off of the instrument, and not to the actual underlying EV size distribution. 
 
 For the first time, we are able to directly visualize quantitative size distributions from flow cytometry data.
 
