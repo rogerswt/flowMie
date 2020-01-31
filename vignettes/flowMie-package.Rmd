@@ -24,18 +24,18 @@ library(KernSmooth)
 ```
 
 ## Introduction
-There has been a great deal of interest in recent years in Extracellular Vesicles (EVs), including exosomes and microvesicles.  There are a number of methods of detecting and characterizing EVs.  Flow cytometry is capable of multi-parameter EV detection and characterization, but not all instruments are capable of this difficult feat.
+There has been a great deal of interest in recent years in Extracellular Vesicles (EVs), including exosomes and microvesicles.  There are a number of methods of detecting and characterizing EVs.  Flow cytometry is capable of multi-parameter EV detection and characterization, but not all instruments are capable of this difficult feat, and of those that are, **all of them** are incapable of seeing the smallest EVs.  That is, flow cytometry has yet to plumb the small-size depths of EV size distributions.  Nevertheless, flow cytometry is an extremely important platform for EV characterization.
 
 `flowMie` provides tools to describe small particles, including calibration beads as well as EVs, along with an optical description of the flow cytometer laser and detector systems, that enable a complete and accurate modeling environment to calculate and characterize the response of your flow cytometer to these very small and dim particles.
 
 ## Describe the Flow Cytometer
-The first step is to describe the characteristics of the flow cytometer that affect its response to the scattering of light.  These characteristics include:
+The first step is to describe the physical characteristics of the flow cytometer that affect its response to the scattering of light.  These characteristics include:
 
 - The nominal scattering angle of the detector
 - The scattering detector half-angle of acceptance with respect to the objective's focal plane
 - The laser polarization
 
-Please note that as of now the detector aperture is assumed to be round disk.  Oddly, the laser wavelength isn't modeled here, in the detector, but rather in the particle (due to the organization of objects in Rscattnlay).
+Please note that as of now the detector aperture is assumed to be round disk.  Oddly, the laser wavelength isn't modeled here, in the detector, but rather in the particle description (see below, due to the organization of objects in Rscattnlay).
 
 ```{r detector, eval=TRUE, echo=TRUE}
 
