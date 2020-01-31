@@ -222,7 +222,7 @@ max(ssc_si / ssc_si_in)
 min(ssc_si / ssc_si_in)
 
 ```
-The differences, while relatively small, are not negligible.  Differences between polarization in-plane versus perpendicular to the plane range from about 12% to 32%, with an average about 20%.  Polarized light perpendicular to the plane of incidence yields higher scattering, whereas polarization in the plane of incidence produces lower scattering.  Unpolarized light is somewhere in between.
+The differences, while relatively small, are not negligible, and can lead to a systematic errors in the estimation of EV sizes.  Differences between polarization in-plane versus perpendicular to the plane range from about 12% to 32%, with an average about 20%.  Polarized light perpendicular to the plane of incidence yields higher scattering, whereas polarization in the plane of incidence produces lower scattering.  Unpolarized light is somewhere in between.
 
 
 ## The Mie Transform
