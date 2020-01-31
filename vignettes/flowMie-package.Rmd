@@ -19,6 +19,8 @@ library(flowCore)
 library(Rscattnlay)
 library(flowMie)
 library(wadeTools)
+library(fields)
+library(KernSmooth)
 ```
 
 ## Introduction
@@ -33,7 +35,7 @@ The first step is to describe the characteristics of the flow cytometer that aff
 - The scattering detector half-angle of acceptance with respect to the objective's focal plane
 - The laser polarization
 
-Please note that as of now the detector aperture is assumed to be round (more precisely, cylindrically symmetrical).  Oddly, the laser wavelength isn't modeled in the detector but rather in the particle (due to the organization of objects in Rscattnlay).
+Please note that as of now the detector aperture is assumed to be round disk.  Oddly, the laser wavelength isn't modeled here, in the detector, but rather in the particle (due to the organization of objects in Rscattnlay).
 
 ```{r detector, eval=TRUE, echo=TRUE}
 
@@ -65,7 +67,7 @@ as well as:
 vesicle = create_particle(medium = 1.34, lambda = 488, n_layers = 2, r = c(95, 100), n = c(1.38, 1.46))
 ```
 
-In addition to this general-purpose function there are a few convenience functions with built-in refractive indices, and which accept the size description as a diameter rather than a radius (in keeping with the way calibration beads are typically described).  These functions are simply wrappers for `create_particle()`:
+In addition to this general-purpose function there are a few convenience functions with built-in refractive indices, and which accept the size description as a diameter rather than a radius (in keeping with the way calibration beads are typically specified by their manufacturers).  These functions are simply wrappers for `create_particle()`:
 
 ```{r beads, eval=TRUE, echo=TRUE}
 # a 100 nm diameter polystyrene bead in saline, illuminated by the blue laser
@@ -78,6 +80,18 @@ bead_silica = create_SI(d = 200)
 ev = create_EV(d = 200)
 
 ```
+The best information we have found on refractive indices of various materials were obtained from the following:
+
+1. EV cytosol and membrane indices, obtained from fluorescence lifetime measurements:
+    - Henk-Jan van Manen et. al., Biophys J. 2008 Apr 15;**94(8)**:L67-9. doi: 10.1529/biophysj.107.127837. Epub 2008 Jan 25.
+1. Silica:
+    - https://refractiveindex.info/?shelf=glass&book=fused_silica&page=Malitson
+1. Polystyrene
+    - https://refractiveindex.info/?shelf=organic&book=polystyren&page=Sultanova
+1. Gold
+    - https://refractiveindex.info/?shelf=main&book=Au&page=Johnson
+
+Indices included as default values are all for 488 nm radiation.  If you use a different laser (e.g. 405 nm) for light scatter measurements please override the default RI values `n` in the appropriate functions.
 
 ## Calculate Scattering Response
 Now that we've described the instrument and the particle we can perform scattering calculations.
@@ -141,11 +155,12 @@ lines(dia, ssc_si_n, col = 'dodgerblue2', lty = 'dotdash', lwd = lwd)
 lines(dia, ssc_ev, col = 'springgreen4', lwd = lwd)
 lines(dia, ssc_ev_n, col = 'springgreen4', lty = 'dotdash', lwd = lwd)
 
-idx = which(dia == 200)
-text(x = 200, y = ssc_au[idx], labels = "Au", col = 'black', cex = cex, pos = 3)
-text(x = 200, y = ssc_ps[idx], labels = "PS", col = 'indianred2', cex = cex, pos = 3)
-text(x = 200, y = ssc_si[idx], labels = "SI", col = 'dodgerblue2', cex = cex, pos = 3)
-text(x = 200, y = ssc_ev[idx], labels = "EV", col = 'springgreen4', cex = cex, pos = 3)
+comp_dia = 100
+idx = which(dia == comp_dia)
+text(x = comp_dia, y = ssc_au[idx], labels = "Au", col = 'black', cex = cex, pos = 4)
+text(x = comp_dia, y = ssc_ps[idx], labels = "PS", col = 'indianred2', cex = cex, pos = 4)
+text(x = comp_dia, y = ssc_si[idx], labels = "SI", col = 'dodgerblue2', cex = cex, pos = 4)
+text(x = comp_dia, y = ssc_ev[idx], labels = "EV", col = 'springgreen4', cex = cex, pos = 4)
 
 ssc_au[idx] / ssc_ps[idx]
 ssc_ps[idx] / ssc_si[idx]
@@ -155,16 +170,108 @@ ssc_au[idx] / ssc_ev[idx]
 
 There are a few things to note about this picture.  
 
-1. First and foremost the y-axis is logarithmic and covers 10 decades of dynamic range.
+1. First and foremost, the y-axis is logarithmic and covers 10 decades of dynamic range (you just don't see this very often!).
 1. Once the particle size drops below about 200-300 nm (or about half the wavelength of the incident light, which in this example is 488 nm), the curves become ridiculously steep.  This means that a small reduction in the particle size results in a large decrease in the signal it will generate.  This sets a pretty hard stop on the size limit of detectability in most cytometers.
-1. The material of which the particle is made has a **profound** effect on the amount of light it scatters.  Gold particles (black curves) >> polystyrene (red curves) >> silica (blue curves) >> EVs (green curves).  Comparing at 200 nm diameter, 
-    - gold scatters almost 10 times as much as polystyrene
+1. The material of which the particle is made has a **profound** effect on the amount of light it scatters.  Gold particles (black curves) >> polystyrene (red curves) >> silica (blue curves) >> EVs (green curves).  Comparing at 100 nm diameter, 
+    - gold scatters almost 50 times as much as polystyrene
     - polystyrene scatters about 5 times as much as silica
-    - silica scatters almost 7 times as much as an EV
-    - gold scatters an astounding 300 times as much as an EV
-1. Comparing the solid versus the dot-dashed curves, we see the smoothing effect due to the large acceptance angle of real-life flow cytometers.  They're the way they are because high numerical aperture optics are generally designed in order to collect as much light as possible.  This means that the side scatter detector doesn't just measure 90 deg. scattering, but a range of +- 60 or so degrees around that 90 deg nominal angle.  The wiggles, or "Mie Resonances", are very pronounced with a narrow detector.
+    - silica scatters about 4 times as much as an EV
+    - gold scatters almost 1000 times as much as an EV
+1. This dependence on the particle material is why the choice of reference materials is so important.  Artificial particles whose size and refractive index are most similar to EVs make the most appropriate reference materials.
+1. Comparing the solid versus the dot-dashed curves, we see the smoothing effect due to the large acceptance angle of real-life flow cytometers.  They're the way they are because high numerical aperture optics are generally part of teh cytometer design in order to collect as much light as possible.  This means that the side scatter detector doesn't just measure 90 deg. scattering, but a range of +- 60 or so degrees around that 90 deg nominal angle.  The wiggles, or "Mie Resonances", are very pronounced with a narrow detector, and not so much with a realistically described flow cytometer.
 
 ## The Mie Transform
+We often look at EVs in a flow cytometry dataset by plotting a fluorescence parameter against, say, SSC-A.  However, we now have the means, via the *Mie Transform*, to directly invert the signal in the data to EV diameter.  The function `mie_transform` performs this inversion.  We will use this function to add a physical size parameter to a flowFrame so that size distributions can be directly studied.
 
+```{r mie_transform, eval=TRUE, echo=TRUE, out.width="100%", fig.height=14, fig.width=14}
+library(flowCore)    # core functions for flow cytometry files
+library(wadeTools)   # for some convenient functions, like doTransform(), bx(), ibx(), etc.
+library(fields)      # xline, yline
+library(KernSmooth)  # bkde
+
+# load bead data.  The beads assumed to be 200 nm Silica
+fn_bead = system.file("extdata", "beads.fcs", package = "flowMie")
+ff_bead = read.FCS(fn_bead)
+
+# load triton data to gate CD41a+ EVs from background
+fn_triton = system.file("extdata", "sampled_triton.fcs", package = "flowMie")
+ff_triton = read.FCS(fn_triton)
+
+# load the EV data and gate it
+fn_ev = system.file("extdata", "sampled_ev.fcs", package = "flowMie")
+ff_ev = read.FCS(fn_ev)
+
+# biexp transform the data
+ff_bead = doTransform(ff_bead, cols = 1:3, method = 'biexp')
+ff_triton = doTransform(ff_triton, cols = 1:3, method = 'biexp')
+ff_ev = doTransform(ff_ev, cols = 1:3, method = 'biexp')
+
+# find the bead MFI on SSC-A
+kde_bead = bkde(exprs(ff_bead)[, "SSC-A"], bandwidth = 0.05)
+bead_mfi = ibx(find.local.maxima(kde_bead)$x)
+
+# calibrate the gain factor
+calibrate = calibrate_ssc_conversion(detector = create_detector(), 
+                               bead = create_SI(d = 200), 
+                               bead_mfi = bead_mfi)
+
+# Compute the Mie Transform and add a size parameter to the EV data
+# Note that we specify transformation = "biexp" to indicate that the bead data
+# were biexponentially transformed.
+ffs = mie_transform(ff = ff_ev, ssc_param = "SSC-A", transformation = 'biexp', lut = calibrate$lut)
+
+# gate the EV data based on the triton negative control and the calibration beads
+kde_triton = bkde(exprs(ff_triton)[, "780/60 Red-A"], bandwidth = 0.05)
+kde_triton$y = bx(1e5) * kde_triton$y / max(kde_triton$y)
+ckde = cumm.kde(kde_triton)
+thresh = kde_triton$x[min(which(ckde$y > 0.995))]
+ffs_gated = Subset(ffs, rectangleGate("780/60 Red-A" = c(thresh, Inf),
+                                      "SSC-A" = c(-Inf, bx(bead_mfi)))
+                   )
+kde_size = bkde(exprs(ffs_gated)[, "Size (nm)"], bandwidth = 5.0)
+kde_size$y = bx(1e5) * kde_size$y / max(kde_size$y)
+
+# Visualize results
+par(mfrow = c(2, 2))
+pplot(ff_bead, c("780/60 Red-A", "SSC-A"), main = "Calibration Beads")
+lines(kde_bead$y, kde_bead$x)
+yline(bx(bead_mfi), col = 'red', lty = 'dotdash', lwd = 2)
+
+pplot(ff_triton, c("780/60 Red-A", "SSC-A"), main = "Triton Negative Control")
+lines(kde_triton)
+xline(thresh, col = 'red', lty = 'dotdash', lwd = 2)
+
+pplot(ffs, c("780/60 Red-A", "SSC-A"), main = "EV Data")
+xline(thresh, col = 'red', lty = 'dotdash', lwd = 2)
+yline(bx(bead_mfi), col = 'red', lty = 'dotdash', lwd = 2)
+kde_size$y = bx(1e5) * kde_size$y / max(kde_size$y)
+
+pplot(ffs_gated, c("780/60 Red-A", "Size (nm)"), ty = 'linear', main = "Gated EV Data by Size")
+lines(kde_size$y, kde_size$x)
+x.text = bx(1e3)
+y.text = 400
+text(x = x.text, y = y.text, 
+     labels = sprintf("Median EV size = %.1f nm", median(exprs(ffs_gated)[, "Size (nm)"])),
+     pos = 4, cex = 2)
+text(x = x.text, y = y.text - 30, 
+     labels = sprintf("Minimum EV size = %.1f nm", min(exprs(ffs_gated)[, "Size (nm)"])), 
+     pos = 4, cex = 2)
+text(x = x.text, y = y.text - 60, 
+     labels = sprintf("Stand Dev EV size = %.1f nm", sd(exprs(ffs_gated)[, "Size (nm)"])),
+     pos = 4, cex = 2)
+
+
+```
+
+## Concluding Remarks
+I hope you will find this package useful in understanding your *flow vesiculometry* data.  
+
+This package is in alpha development.  I would encourage you to contact me if you have any comments, bug reports, or suggestions for improvements and extensions.
+
+[Wade Rogers](mailto:wade.rogers@spcytomics.com)
+
+[Still Pond Cytomics](https://spcytomics.com)
+
+Please cite this package if you use it in a publication.
 
 
