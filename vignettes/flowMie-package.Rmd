@@ -300,6 +300,7 @@ kde_size$y = bx(1e5) * kde_size$y / max(kde_size$y)
 
 # fourth plot: gated EV size distribution
 pplot(ffs_gated, c("780/60 Red-A", "Size (nm)"), ty = 'linear', main = "Gated EV Data by Size")
+points(exprs(ffs_gated)[, c("780/60 Red-A", "Size (nm)")], pch = 20, cex = .2)
 lines(kde_size$y, kde_size$x)
 x.text = bx(1e3)
 y.text = 400
