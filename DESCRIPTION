@@ -20,5 +20,10 @@ Imports:
   flowCore,
   methods
 RoxygenNote: 7.0.2
-Suggests: knitr, rmarkdown
+Suggests: 
+  knitr, 
+  rmarkdown,
+  wadeTools,
+  KernSmooth,
+  fields
 VignetteBuilder: knitr

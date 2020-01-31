@@ -24,7 +24,7 @@ library(KernSmooth)
 ```
 
 ## Introduction
-There has been a great deal of interest in recent years in Extracellular Vesicles (EVs), including exosomes and microvesicles.  There are a number of methods of detecting and characterizing EVs.  Flow cytometry is capable of multi-parameter EV detection and characterization, but not all instruments are capable of this difficult feat, and of those that are, **all of them** are incapable of seeing the smallest EVs.  That is, flow cytometry has yet to plumb the small-size depths of EV size distributions.  Nevertheless, flow cytometry is an extremely important platform for EV characterization.
+There has been a great deal of interest in recent years in Extracellular Vesicles (EVs), including exosomes and microvesicles.  There are a number of methods of detecting and characterizing EVs.  Flow cytometry is capable of multi-parameter EV detection and characterization, but not all instruments are capable of this difficult feat, and of those that are, **none of them** are capable of seeing the smallest EVs.  That is, flow cytometry has yet to plumb the small-size depths of EV size distributions.  Nevertheless, flow cytometry is an extremely important platform for EV characterization.  Thus, it's important to quantitatively understand the capabilities and limitations of the instruments that are used for these applications.
 
 `flowMie` provides tools to describe small particles, including calibration beads as well as EVs, along with an optical description of the flow cytometer laser and detector systems, that enable a complete and accurate modeling environment to calculate and characterize the response of your flow cytometer to these very small and dim particles.
 
@@ -35,7 +35,7 @@ The first step is to describe the physical characteristics of the flow cytometer
 - The scattering detector half-angle of acceptance with respect to the objective's focal plane
 - The laser polarization
 
-Please note that as of now the detector aperture is assumed to be round disk.  Oddly, the laser wavelength isn't modeled here, in the detector, but rather in the particle description (see below, due to the organization of objects in Rscattnlay).
+Please note that as of now `flowMie` assumes the detector aperture to be a round disk.  Oddly, the laser wavelength isn't modeled here, in the detector, but rather in the particle description (see below, due to the organization of objects in Rscattnlay).
 
 ```{r detector, eval=TRUE, echo=TRUE}
 
@@ -101,13 +101,13 @@ val = calculate_detector_response(particle = create_SI(d = 200), detector = crea
 val
 ```
 
-Let's look at the size-dependence of several types of particles, with a realistic instrument, and an instrument with a very narrow acceptance half-angle:
+Let's look at the size-dependence of several types of particles, with a realistic instrument, and with a hypothetical instrument with a very narrow acceptance half-angle:
 ```{r size_dep, eval=TRUE, echo=TRUE, out.width="100%", fig.height=14, fig.width=14}
 
-# make an "instrument" with narrow acceptance angle for SSC
+# make a hypothetical instrument with narrow acceptance angle for SSC
 instr_narrow = create_detector(beta = 1)
 
-# make an instrument that corresponds to a BD Canto
+# make an instrument that corresponds to a BD FACSCanto
 instr_canto = create_detector()
 
 dia = seq(20, 1000, by = 5)
@@ -170,19 +170,19 @@ ssc_au[idx] / ssc_ev[idx]
 
 There are a few things to note about this picture.  
 
-1. First and foremost, the y-axis is logarithmic and covers 10 decades of dynamic range (you just don't see this very often!).
+1. First and foremost, the y-axis is logarithmic and covers **10 decades** of dynamic range (you just don't see this very often!).
 1. Once the particle size drops below about 200-300 nm (or about half the wavelength of the incident light, which in this example is 488 nm), the curves become ridiculously steep.  This means that a small reduction in the particle size results in a large decrease in the signal it will generate.  This sets a pretty hard stop on the size limit of detectability in most cytometers.
 1. The material of which the particle is made has a **profound** effect on the amount of light it scatters.  Gold particles (black curves) >> polystyrene (red curves) >> silica (blue curves) >> EVs (green curves).  Comparing at 100 nm diameter, 
     - gold scatters almost 50 times as much as polystyrene
     - polystyrene scatters about 5 times as much as silica
     - silica scatters about 4 times as much as an EV
     - gold scatters almost 1000 times as much as an EV
-1. This dependence on the particle material is why the choice of reference materials is so important.  Artificial particles whose size and refractive index are most similar to EVs make the most appropriate reference materials.
-1. Comparing the solid versus the dot-dashed curves, we see the smoothing effect due to the large acceptance angle of real-life flow cytometers.  They're the way they are because high numerical aperture optics are generally part of the cytometer design in order to collect as much light as possible.  This means that the side scatter detector doesn't just measure 90 deg. scattering, but a range of +- 60 or so degrees around that 90 deg nominal angle.  The wiggles, or "Mie Resonances", are very pronounced with a narrow detector, and not so much with a realistically described flow cytometer.
-1. For instruments with large numerical aperture, the Mie scattering signal is pretty much monotonic up to about 500-600 nm.  This is important for computing the Mie Transform (see the next section).  If the scattering signal is NOT monotonic, then a given scattering signal could correspond to two (or more) vastly different particle sizes (draw a horizontal line through the Mie Resonances in the above figure to see what I mean).  Fortunately, for particle sizes of interest (<500 nm typically) and large numerical aperture, this isn't the case.
+1. **This dependence on the particle material is why the choice of reference materials is so important.  Artificial particles whose size and refractive index are most similar to EVs make the most appropriate reference materials.**
+1. Comparing the solid versus the dot-dashed curves, we see the smoothing effect due to the large acceptance angle of real-life flow cytometers.  They are the way they are because high numerical aperture optics are generally part of the cytometer design in order to collect as much light as possible to optimize sensitivity.  This means that the side scatter detector doesn't just measure 90 deg. scattering, but a range of +- 60 or so degrees around that 90 deg nominal angle.  The wiggles, or "Mie Resonances", are very pronounced with a narrow detector, and not so much with a realistically described flow cytometer.
+1. For instruments with large numerical aperture, the Mie scattering signal is pretty much monotonic up to about 500-600 nm.  This is important for computing the Mie Transform (see the next section).  If the scattering signal is NOT monotonic, then a given scattering signal could correspond to two (or more) vastly different particle sizes (draw a horizontal line through the Mie Resonances in the above figure to see what I mean).  For example, EV Mie Resonances intersect the scattering intensity of 10^-3^ at the following EV sizes:  135, 315, 370, 585, 615 and 850 nm.  Fortunately, for particle sizes of interest (<500 nm typically) and large numerical aperture, this isn't the case.
 
 ## Polarization Effects
-All other treatments of Mie Theory for flow cytometry of which we are aware have not taken into account the polarization state of the incident light.  This is a small but significant effect.  Given that most flow cytometers use lasers as the light source, and since lasers  nearly always produce linearly polarized light, it seems to us that this should be taken into account.
+All other treatments of Mie Theory for flow cytometry of which we are aware have not taken into account the polarization state of the incident light.  This is a small but significant effect.  Given that most flow cytometers use lasers as the light source, and since lasers nearly always produce linearly polarized light, it seems to us that this should be taken into account.
 
 ```{r polarization, eval=TRUE, echo=TRUE, out.width="100%", fig.height=14, fig.width=14}
 det_unpol = create_detector(theta_0 = 90, beta = 60, psi_0 = 90, pol = 0)
@@ -226,10 +226,10 @@ The differences, while relatively small, are not negligible, and can lead to a s
 
 Polarization effects are a function of the detector numerical aperture.  For lower numerical aperture instruments, polarization effects can lead to differences of several-fold, as opposed to 10 - 30% for high numerical aperture machines.  Thus, care should be taken to accurately characterize the detector, in terms of both detector numerical aperture (or equivalently the half-angle of acceptance) as well as the polarization state of the illuminating laser light.
 
-We welcome instrument manufacturers to submit specifications for inclusion in this package.  Please send an email to: [Wade Rogers](mailto:wade.rogers@spcytomics.com)
+We welcome instrument manufacturers to submit specifications for inclusion in this package.  Please send an email to [Wade Rogers](mailto:wade.rogers@spcytomics.com) to start a discussion.
 
 ## The Mie Transform
-We often look at EVs in a flow cytometry dataset by plotting a fluorescence parameter against, say, SSC-A.  However, we now have the means, via the *Mie Transform*, to directly invert the signal in the data to EV diameter.  The function `mie_transform` performs this inversion.  We will use this function to add a physical size parameter to a flowFrame so that size distributions can be directly studied.
+We often look at EVs in a flow cytometry dataset by plotting a fluorescence parameter against, say, SSC-A.  However, we now have the means, via the *Mie Transform*, to directly invert the signal in the data to EV diameter.  The function `mie_transform()` performs this inversion.  We will use this function to add a physical size parameter to a flowFrame so that particle size distributions can be directly studied.
 
 ```{r mie_transform, eval=TRUE, echo=TRUE, out.width="100%", fig.height=14, fig.width=14}
 library(flowCore)    # core functions for flow cytometry files
@@ -317,10 +317,17 @@ text(x = x.text, y = y.text - 60,
 
 ```
 
-## Concluding Remarks
-I hope you  find this package useful in understanding your *flow vesiculometry* data.  
+- The upper left panel shows the analysis of the calibration beads.  
+- The upper right panel deduces a fluorescence threshold based on a tritonized sample, in which EVs are wiped out but sources of background remain.  
+- The lower left panel shows the EV sample, analyzed under identical conditions as both the bead and triton runs.  The red lines indicate cut-offs used to gate the EV region.  
+- Finally, the lower right panel shows the gated EVs, with the Y-axis indicating particle size in nm as computed with the Mie Transform. We note that the sharp rise of the distribution at about 100 nm is certainly due to the sensitivity cut-off of the instrument, and not to the actual underlying EV size distribution.
 
-This package is in alpha development.  I would encourage you to contact me if you have any comments, bug reports, or suggestions for improvements and extensions.
+For the first time, we are able to directly visualize quantitative size distributions from flow cytometry data.
+
+## Concluding Remarks
+I hope you find this package useful in understanding your *flow vesiculometry* data.  
+
+This package is in alpha development.  I encourage you to contact me if you have any comments, bug reports, or suggestions for improvements and extensions.
 
 [Wade Rogers](mailto:wade.rogers@spcytomics.com)
 
