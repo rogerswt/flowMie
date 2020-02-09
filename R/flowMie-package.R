@@ -16,4 +16,5 @@
 #' @import flowCore
 #' @importFrom methods as is
 #' @importFrom stats approx
+#' @importFrom graphics axis segments text
 NULL

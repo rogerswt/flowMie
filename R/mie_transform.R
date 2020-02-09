@@ -54,7 +54,7 @@ calibrate_ssc_conversion = function(detector = create_detector(),
 
     dec.max = ceiling(log10(max(lut$signal)))
     dec.min = floor(log10(min(lut$signal)))
-    axis(side = 2, at = 10^(dec.min:dec.max), labels = tick.labels(dec.min, dec.max))
+    axis(side = 2, at = 10^(dec.min:dec.max), labels = wadeTools::tick.labels(dec.min, dec.max))
 
     bead_diameter = 2 * bead@layers[[1]]@r
     ev_sig_at_bead_diameter = lut$signal[which(lut$diameter == bead_diameter)]
