@@ -5,7 +5,7 @@
 \title{Calculate Detector Response}
 \usage{
 calculate_detector_response(
-  S,
+  particle = create_EV(d = 180),
   detector = create_detector(),
   gain = 1,
   dr = 0.02,
@@ -13,9 +13,10 @@ calculate_detector_response(
 )
 }
 \arguments{
-\item{S}{A \code{ \link[Rscattnlay]{Scatterer}} particle description. This object
+\item{particle}{A \code{ \link[Rscattnlay]{Scatterer}} particle description. This object
 encapsulates the medium's and the particle's refractive indices, the particle's
-geometry (e.g. core + shell, just core, etc), and the incident radiation wavelength.}
+geometry (e.g. core + shell, just core, etc), and the incident radiation wavelength.
+Default = an EV with diameter 180 nm.}
 
 \item{detector}{A detector object, created using \link{create_detector}.  This
 object describes the geometry of the detector as well as the polarization state

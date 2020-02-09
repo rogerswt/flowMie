@@ -44,10 +44,11 @@ calculate_detector_response = function(particle = create_EV(d = 180), detector =
   if (is(particle) != "Scatterer") {
     stop("Please create a valid particle description using create_particle()")
   }
-  beta = detector$beta
+  alpha = detector$alpha
   psi_0 = detector$psi_0
   pol = detector$pol
   theta_0 = detector$theta_0
+  eta = detector$eta
 
   # get the Stokes matrix elements S11, S12
   Q <- amplitudes(particle)
@@ -58,8 +59,8 @@ calculate_detector_response = function(particle = create_EV(d = 180), detector =
   S11 = 0.5 * (abs(S2)^2 + abs(S1)^2)
   S12 = 0.5 * (abs(S2)^2 - abs(S1)^2)
 
-  # calculate distance to detector, given R = 1 and beta
-  l = 1 / tan(beta*pi/180)
+  # calculate distance to detector, given R = 1 and alpha
+  l = 1 / tan(alpha*pi/180)
 
   # calculate area of detector, for normalization at the end
   A = pi
@@ -79,7 +80,10 @@ calculate_detector_response = function(particle = create_EV(d = 180), detector =
       s11 = S11[idx]
       s12 = S12[idx]
 
-      incr_ssc = (s11 + s12 * pol * cos(2*psi)) * r * dr * dphi
+      # this area element has a relative efficiency given by eta(alpha)
+      alpha_prime = atan2(r, l)
+      eff = eta(alpha_prime, alpha * pi / 180)
+      incr_ssc = eff * (s11 + s12 * pol * cos(2*psi)) * r * dr * dphi
       # if (r == 1) {
       #   cat("idx = ", idx, "psi = ", psi, "incr_ssc = ", incr_ssc, "\n")
       # }

@@ -43,7 +43,7 @@ Please note that as of now `flowMie` assumes the detector aperture to be a round
 #    - located at 90 degrees with respect to the incident laser light,
 #    - with a detector half-angle of 60 degrees,
 #    - laser is linearly polarized perpendicular to the plane of incidence
-detector = create_detector(theta_0 = 90, beta = 60, psi_0 = 90, pol = 1.0)
+detector = create_detector(theta_0 = 90, alpha = 60, psi_0 = 90, pol = 1.0)
 ```
 
 ## Describe Particles
@@ -105,7 +105,7 @@ Let's look at the size-dependence of several types of particles, with a realisti
 ```{r size_dep, eval=TRUE, echo=TRUE, out.width="100%", fig.height=14, fig.width=14}
 
 # make a hypothetical instrument with narrow acceptance angle for SSC
-instr_narrow = create_detector(beta = 1)
+instr_narrow = create_detector(alpha = 1)
 
 # make an instrument that corresponds to a BD FACSCanto
 instr_canto = create_detector()
@@ -185,9 +185,9 @@ There are a few things to note about this picture.
 All other treatments of Mie Theory for flow cytometry of which we are aware have not taken into account the polarization state of the incident light.  This is a small but significant effect.  Given that most flow cytometers use lasers as the light source, and since lasers nearly always produce linearly polarized light, it seems to us that this should be taken into account.
 
 ```{r polarization, eval=TRUE, echo=TRUE, out.width="100%", fig.height=14, fig.width=14}
-det_unpol = create_detector(theta_0 = 90, beta = 60, psi_0 = 90, pol = 0)
-det_pol   = create_detector(theta_0 = 90, beta = 60, psi_0 = 90, pol = 1.0)
-det_pol_in   = create_detector(theta_0 = 90, beta = 60, psi_0 = 0, pol = 1.0)
+det_unpol = create_detector(theta_0 = 90, alpha = 60, psi_0 = 90, pol = 0)
+det_pol   = create_detector(theta_0 = 90, alpha = 60, psi_0 = 90, pol = 1.0)
+det_pol_in   = create_detector(theta_0 = 90, alpha = 60, psi_0 = 0, pol = 1.0)
 
 dia = seq(20, 1000, by = 5)
 ssc_si    = vector('numeric')
