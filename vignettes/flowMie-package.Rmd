@@ -43,7 +43,7 @@ Please note that as of now `flowMie` assumes the detector aperture to be a round
 #    - located at 90 degrees with respect to the incident laser light,
 #    - with a detector half-angle of 60 degrees,
 #    - laser is linearly polarized perpendicular to the plane of incidence
-detector = create_detector(theta_0 = 90, alpha = 60, psi_0 = 90, pol = 1.0)
+detector = create_detector(theta_0 = 90, alpha = 60, psi_0 = 90, pol = 1.0, eta = eta_uniform)
 ```
 
 ## Describe Particles
