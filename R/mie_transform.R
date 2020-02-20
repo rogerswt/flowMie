@@ -34,18 +34,18 @@ calibrate_ssc_conversion = function(detector = create_detector(),
                                     bead_mfi = 60000,
                                     show = FALSE) {
   ssc_raw = calculate_detector_response(particle = bead, detector = detector)
-  gain = bead_mfi / ssc_raw
+  detector$gain = gain = bead_mfi / ssc_raw
 
   ssc_ev = vector('numeric')
   diameter = seq(20, 500, by = 2)
   for (i in 1:length(diameter)) {
     P <- create_EV(d = diameter[i])
-    ssc_ev[i]  = calculate_detector_response(P, detector, gain = gain)
+    ssc_ev[i]  = calculate_detector_response(P, detector)
   }
 
-  lut = data.frame(signal = ssc_ev, diameter = diameter)
+  detector$lut = lut = data.frame(signal = ssc_ev, diameter = diameter)
 
-  if(show) {
+  if (show) {
     plot(lut$diameter, lut$signal,
          xlab = "EV Diameter (nm)",
          ylab = "Detector Signal (MFI units)",
@@ -68,7 +68,7 @@ calibrate_ssc_conversion = function(detector = create_detector(),
     text(x = x.text, y = y.text / 4, labels = sprintf("EV Signal @ %.1f nm = %.1f", bead_diameter, ev_sig_at_bead_diameter), pos = 4, cex = 1.25)
   }
 
-  return(list(gain = gain, lut = lut))
+  return(detector)
 }
 
 
@@ -79,7 +79,7 @@ calibrate_ssc_conversion = function(detector = create_detector(),
 #' **NOTE: should be the same parameter used to detect the calibration bead in \link{calibrate_ssc_conversion()}.**
 #' @param transformation What transformation was used on the scattering parameter.  Ones
 #' currently supported include c("none", "biexp").
-#' @param lut The lookup table of signal vs size created by \link{calibrate_ssc_conversion()}.
+#' @param detector A detector, having been calibrated by \link{calibrate_ssc_conversion()}.
 #' @description Calculate the Mie Transform, which converts a scattering signal to
 #' a corresponding EV diameter by means of calculated scattering from a calibration particle.
 #' @details There are several limitations of this function having to do with whether
@@ -91,9 +91,14 @@ calibrate_ssc_conversion = function(detector = create_detector(),
 mie_transform = function(ff,
                          ssc_param = "SSC-A",
                          transformation = c("none", "biexp"),
-                         lut = calibrate_ssc_conversion()$lut) {
+                         detector) {
 
   transformation = match.arg(transformation, c("none", "biexp"))
+
+  if (is.null(detector$lut)) {
+    stop("Please calibrate this detector using calibrate_ssc_conversion()")
+  }
+  lut = detector$lut
 
   # extract the ssc parameter
   ssc = exprs(ff)[, ssc_param]
@@ -107,7 +112,7 @@ mie_transform = function(ff,
   ssc[ssc < 0] = 0
 
   # handle large values
-  ssc[ssc >= max(lut)] = max(lut)
+  ssc[ssc >= max(lut$signal)] = max(lut$signal)
 
   # pass it through the lut
   size = approx(lut, xout = ssc)$y

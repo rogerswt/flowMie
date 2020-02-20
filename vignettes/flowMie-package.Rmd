@@ -26,7 +26,7 @@ library(KernSmooth)
 ## Introduction
 There has been a great deal of interest in recent years in Extracellular Vesicles (EVs), including exosomes and microvesicles.  There are a number of methods of detecting and characterizing EVs.  Flow cytometry is capable of multi-parameter EV detection and characterization, but not all instruments are capable of this difficult feat, and of those that are, **none of them** are capable of seeing the smallest EVs.  That is, flow cytometry has yet to plumb the small-size depths of EV size distributions.  Nevertheless, flow cytometry is an extremely important platform for EV characterization.  Thus, it's important to quantitatively understand the capabilities and limitations of the instruments that are used for these applications.
 
-`flowMie` provides tools to describe small (single- or multi-layer) particles, including calibration beads as well as EVs, along with an optical description of the flow cytometer laser and detector systems, that enable a complete and accurate modeling environment to calculate and characterize the response of your flow cytometer to these very small and dim particles.  We also introduce a new concept - **the Mie Transform** - which uses calibrated flow cytometry data to directly compute the diameter of each event in an FCS file.
+`flowMie` provides tools to describe small (single- or multi-layer) particles, including calibration beads as well as EVs, along with an optical description of the flow cytometer laser and detector systems, that enable a complete and accurate modeling environment to calculate and characterize the response of your flow cytometer to these very small and dim particles.  We also implement **the Mie Transform** which uses calibrated flow cytometry data to directly compute the diameter of each event in an FCS file.
 
 ## Describe the Flow Cytometer
 The first step is to describe the physical characteristics of the flow cytometer that affect its response to the scattering of light.  These characteristics include:
@@ -260,14 +260,14 @@ kde_bead = bkde(exprs(ff_bead)[, "SSC-H"], bandwidth = 0.05)
 bead_mfi = ibx(find.local.maxima(kde_bead)$x)
 
 # calibrate the gain factor.  We'll use this later for mie_transform().
-calibrate = calibrate_ssc_conversion(detector = create_detector(), 
+detector = calibrate_ssc_conversion(detector = create_detector(), 
                                      bead = create_PS(d = 200), 
                                      bead_mfi = bead_mfi)
 
 # Compute the Mie Transform and add a size parameter to the EV data
 # Note that we specify transformation = "biexp" to indicate that the bead data
 # were biexponentially transformed.
-ffs = mie_transform(ff = ff_ev, ssc_param = "SSC-H", transformation = 'biexp', lut = calibrate$lut)
+ffs = mie_transform(ff = ff_ev, ssc_param = "SSC-H", transformation = 'biexp', detector = detector)
 
 # gate the EV data based on the triton negative control (for fluorescence) and the calibration beads (for size)
 kde_triton = bkde(exprs(ff_triton)[, "780/60 Red-A"], bandwidth = 0.05)
@@ -321,8 +321,6 @@ text(x = x.text, y = y.text - 60,
 - The upper right panel deduces a fluorescence threshold based on a tritonized sample, in which EVs are wiped out but sources of background remain.  
 - The lower left panel shows the EV sample, analyzed under identical conditions as both the bead and triton runs.  The red lines indicate cut-offs used to gate the EV region.  
 - Finally, the lower right panel shows the gated EVs, with the Y-axis indicating particle size in nm as computed with the Mie Transform. We note that the sharp rise of the distribution at about 150 nm is an instrument effect, and not to the actual underlying EV size distribution. In this case the instrument was triggering on SSC, and the trigger threshold was high enough to reduce excess event rates, thereby limiting the lower size limit of this run.  Triggering on a fluorescence signal would presumably lower the size limit of detection.
-
-For the first time, we are able to directly visualize quantitative size distributions from flow cytometry data.
 
 ## Concluding Remarks
 I hope you find this package useful in understanding your *flow vesiculometry* data.  

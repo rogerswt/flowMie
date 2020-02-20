@@ -9,7 +9,10 @@ create_detector(
   alpha = 60,
   psi_0 = 90,
   pol = 1,
-  eta = eta_uniform
+  gain = 1,
+  lut = NULL,
+  eta = eta_uniform,
+  eta_fac = NA
 )
 }
 \arguments{
@@ -25,7 +28,14 @@ polarization in the PoI.  Default = 90.}
 \item{pol}{Degree of (linear) polarization.  0 <= pol <= 1.0.  1.0 means fully polarized, 0.0 means
 unpolarized.  Default = 1.0}
 
+\item{gain}{A relative gain factor, used to "calibrate" a detector}
+
+\item{lut}{A lookup table, calculated during calibration, to 'invert' the Mie transform
+such that, given a scattering signal, the particle diameter can be looked up.}
+
 \item{eta}{A function describing the radial detector efficiency}
+
+\item{eta_fac}{A factor used in some eta functions}
 }
 \value{
 An object of class 'detector', with the following elements:

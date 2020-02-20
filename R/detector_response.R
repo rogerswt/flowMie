@@ -19,8 +19,6 @@
 #' @param detector A detector object, created using \link{create_detector}.  This
 #' object describes the geometry of the detector as well as the polarization state
 #' of the incident light.
-#' @param gain A coefficient that expresses the relative conversion of photons
-#' to scattering signal amplitude.  Default = 1.0.
 #' @param dr The numerical integration delta_radius across the detector, whose
 #' diameter is, by definition, 1.0.  Integration limits are 0,1.  Default = 0.02,
 #' accurate to about 2 percent.
@@ -35,7 +33,7 @@
 #' polarization effects.
 #' @export
 calculate_detector_response = function(particle = create_EV(d = 180), detector = create_detector(),
-                                       gain = 1, dr = .02, dphi = 10.0) {
+                                       dr = .02, dphi = 10.0) {
 
   if (is(detector) != "detector") {
     stop("Please create a valid detector using create_detector()")
@@ -49,6 +47,8 @@ calculate_detector_response = function(particle = create_EV(d = 180), detector =
   pol = detector$pol
   theta_0 = detector$theta_0
   eta = detector$eta
+  eta_fac = detector$eta_fac
+  gain = detector$gain
 
   # get the Stokes matrix elements S11, S12
   Q <- amplitudes(particle)
@@ -82,7 +82,7 @@ calculate_detector_response = function(particle = create_EV(d = 180), detector =
 
       # this area element has a relative efficiency given by eta(alpha)
       alpha_prime = atan2(r, l)
-      eff = eta(alpha_prime, alpha * pi / 180)
+      eff = eta(alpha_prime, alpha * pi / 180, eta_fac = eta_fac)
       incr_ssc = eff * (s11 + s12 * pol * cos(2*psi)) * r * dr * dphi
       # if (r == 1) {
       #   cat("idx = ", idx, "psi = ", psi, "incr_ssc = ", incr_ssc, "\n")

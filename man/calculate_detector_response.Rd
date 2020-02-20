@@ -7,7 +7,6 @@
 calculate_detector_response(
   particle = create_EV(d = 180),
   detector = create_detector(),
-  gain = 1,
   dr = 0.02,
   dphi = 10
 )
@@ -21,9 +20,6 @@ Default = an EV with diameter 180 nm.}
 \item{detector}{A detector object, created using \link{create_detector}.  This
 object describes the geometry of the detector as well as the polarization state
 of the incident light.}
-
-\item{gain}{A coefficient that expresses the relative conversion of photons
-to scattering signal amplitude.  Default = 1.0.}
 
 \item{dr}{The numerical integration delta_radius across the detector, whose
 diameter is, by definition, 1.0.  Integration limits are 0,1.  Default = 0.02,

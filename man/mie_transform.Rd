@@ -8,7 +8,7 @@ mie_transform(
   ff,
   ssc_param = "SSC-A",
   transformation = c("none", "biexp"),
-  lut = calibrate_ssc_conversion()$lut
+  detector
 )
 }
 \arguments{
@@ -20,7 +20,7 @@ mie_transform(
 \item{transformation}{What transformation was used on the scattering parameter.  Ones
 currently supported include c("none", "biexp").}
 
-\item{lut}{The lookup table of signal vs size created by \link{calibrate_ssc_conversion()}.}
+\item{detector}{A detector, having been calibrated by \link{calibrate_ssc_conversion()}.}
 }
 \value{
 A flowFrame, with a new parameter called "Size (nm)".

@@ -3,20 +3,28 @@
 \name{eta_uniform}
 \alias{eta_uniform}
 \alias{eta_van_der_pol}
+\alias{eta_mvdp}
 \title{Model Detector Radial Efficiency}
 \usage{
-eta_uniform(alpha_prime, alpha)
+eta_uniform(alpha_prime = NA, alpha = NA, eta_fac = NA)
 
-eta_van_der_pol(alpha_prime, alpha)
+eta_van_der_pol(alpha_prime = NA, alpha = NA, eta_fac = NA)
+
+eta_mvdp(alpha_prime = NA, alpha = NA, eta_fac = NA)
 }
 \arguments{
-\item{alpha_prime}{The variable angle over the detector (zero on the axis)}
+\item{alpha_prime}{The variable angle (in radians) over the detector (zero on the axis)}
 
-\item{alpha}{The maximum acceptance angle of the detector}
+\item{alpha}{The maximum acceptance angle (in radians) of the detector}
+
+\item{fac}{The relative efficiency of the detector at its edge (0.0 < fac < 1.0)}
 }
 \description{
 \code{eta_uniform} models a uniform detector
 
 \code{eta_van_der_pol} models a detector whose efficiency drops
 off sinusoidally from 1.0 on the axis to 0.0 at the maximum acceptance angle
+
+\code{eta_mvdp} models a detector whose efficiency drops
+off sinusoidally from 1.0 on the axis to 'fac' (0.0 < fac < 1.0) at the maximum acceptance angle
 }
