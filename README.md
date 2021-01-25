@@ -35,7 +35,8 @@ Now you're ready:
 #### Step 4: Please read the vignette and enjoy!
 
 ## Citation
-flowMie is as yet unpublished.  Please acknowledge me if you use it for publication,
+flowMie was presented as a [poster at the virtual CYTO_2020 meeting](FlowMie_CYTO2020.pdf).  
+Please acknowledge me if you use it for publication,
 and drop me a note as well!
 
 [Wade Rogers](mailto:wade.rogers@spcytomics.com)
